@@ -1,75 +1,98 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\Menu;
+// use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use illuminate\Support\Facades\Hash;
 
-class MenuController extends Controller {
-    public function createMenu (Request $req)
+class MenuController extends Controller
+{
+    public function getmenu()
     {
-        $validator = Validator::make($req->all(),[
-            'nama_menu'=>'required',
-            'jenis'=>'required',
-            'deskripsi'=>'required',
-            'gambar'=>'required',
-            'harga'=>'required',
+        $getmenu = Menu::get();
+        return response()->json($getmenu);
+    }
+
+    public function selectmenu($id)
+    {
+        $getmenu = Menu::where('id_menu', $id)->get();
+        return response()->json($getmenu);
+    }
+
+    public function createmenu(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'nama_menu' => 'required',
+            'jenis' => 'required',
+            'harga' => 'required',
+            // 'jumlah_pesan' => 'required',
         ]);
-        if($validator->fails()){
-            return Response()->json($validator->errors()->toJson());
-        }
-        // $image_path = $req->file('image')->store('images','public');
 
-        $save = Menu::create([
-            'nama_menu'=>$req->get('nama_menu'),
-            'jenis'=>$req->get('jenis'),
-            'deskripsi'=>$req->get('deskripsi'),
-            'gambar'=>$req->get('gambar'),
-            'harga'=>$req->get('harga'),
+        if ($validator->fails()) {
+            return response()->json($validator->errors()->tojson());
+        }
+
+        $imagename = time() . '.' . $req->foto->extension();
+        $req->foto->move(public_path('images'), $imagename);
+
+        $create = DB::table('menu')->insert([
+            'nama_menu' => $req->input('nama_menu'),
+            'jenis' => $req->input('jenis'),
+            'harga' => $req->input('harga'),
+            'foto' => $imagename
         ]);
-        if($save){
-            return Response()->json(['status'=>true, 'message'=>'Sukses menambahkan menu']);
+
+        if ($create) {
+            return response()->json(['Message' => 'Berhasil']);
         } else {
-            return Response()->json(['status'=>false, 'message'=>'Gagal menambahkan menu']);
+            return response()->json(['Message' => 'Gagal']);
         }
     }
 
-    public function updateMenu(Request $req, $id_menu)
+    public function updatemenu(Request $r, $id)
     {
-       $validator = Validator::make($req->all(),[
-        'nama_menu'=>'required',
-        'jenis'=>'required',
-        'deskripsi'=>'required',
-        'gambar'=>'required',
-        'harga'=>'required',
-       ]);
-       if($validator->fails()){
-        return Response()->json($validator->errors()->toJson());
-       }
-    //    $image_path = $req->file('image')->store('images','public');
+        // $imagename = time().'.'.$r->foto->extension();
+        // $r->foto->move(public_path('images'), $imagename);
 
-    $ubah=Menu::where('id_menu',$id_menu)->update([
-        'nama_menu' =>$req->get('nama_menu'),
-        'jenis' =>$req->get('jenis'),
-        'deskripsi' =>$req->get('deskripsi'),
-        'gambar' =>$req->get('gambar'),
-        'harga' =>$req->get('harga'),
+        $update = DB::table('menu')->where('id_menu', $id)->update([
+            'nama_menu' => $r->input('nama_menu'),
+            'jenis' => $r->input('jenis'),
+            'harga' => $r->input('harga'),
+            // 'foto' => $imagename
+        ]);
 
-    ]);
-    if($ubah){
-        return Response()->json(['status'=>true,'message' => 'Berhasil Mengubah Menu']);
-    } else {
-        return Response()->json(['status'=>false,'message' => 'Gagal Mengubah Menu']);
-    }
-    }
-
-    public function deleteMenu($id_menu)
-    {
-        $hapus=Menu::where('id_menu', $id_menu)->delete();
-        if($hapus){
-            return Response()->json(['status'=>true, 'message' => 'Sukses Hapus Menu']);
+        if ($update) {
+            return response()->json(['Message' => 'Berhasil']);
         } else {
-            return Response()->json(['status'=>false,'message' => "Gagal Hapus Menu"]);
+            return response()->json(['Message' => 'Gagal']);
+        }
+    }
+
+    public function updatephoto(Request $req, $id)
+    {
+        $imagename = time() . '.' . $req->foto->extension();
+        $req->foto->move(public_path('images'), $imagename);
+
+        $update = Menu::where('id_menu', $id)->update([
+            'foto' => $imagename
+        ]);
+
+        return response()->json([
+            "Message" => "Berhasil",
+            "Result" => $update
+        ]);
+    }
+
+    public function deletemenu($id)
+    {
+        $delete = DB::table('menu')->where('id_menu', $id)->delete();
+        if ($delete) {
+            return response()->json('Berhasil');
+        } else {
+            return response()->json('Menu Tidak Ada / Sudah Terhapus');
         }
     }
 }

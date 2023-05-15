@@ -1,57 +1,77 @@
 <?php
+
 namespace App\Http\Controllers;
-use App\Models\Meja;
+
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
+use App\Models\Meja;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use illuminate\Support\Facades\Hash;
 
-class MejaController extends Controller {
-    public function createMeja (Request $req)
+class MejaController extends Controller
+{
+    public function getmeja()
     {
-        $validator = Validator::make($req->all(),[
-            'nomor_meja'=>'required',
+        $getmeja = Meja::get();
+        return response()->json($getmeja);
+    }
+
+    public function mejatersedia()
+    {
+        $meja = Meja::where('status', '!=' ,'digunakan')->get();
+            return response()->json($meja);
+    }   
+
+    public function selectmeja($id)
+    {
+        $getmeja = Meja::where('id_meja', $id)->get();
+        return response()->json($getmeja);
+    }
+
+    public function createmeja(Request $req)    
+    {
+        $create  = DB::table('meja')->insert([
+            'nomor_meja' => $req->input('nomor_meja'),
+            'status' => 'kosong'
         ]);
-        if($validator->fails()){
-            return Response()->json($validator->errors()->toJson());
+
+        if($create){
+            return response()->json(['status'=>'Berhasil']);
+        } else {
+            return response()->json(['status' => 'Gagal']);
+        }
+    }
+
+    public function updatemeja(Request $req, $id)
+    {
+        $validator = Validator::make($req->all(), [
+            'nomor_meja' => 'required',
+            // 'status' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors()->toJson());
         }
 
-        $save = Meja::create([
-            'nomor_meja'=>$req->get('nomor_meja'),
+        $update  = DB::table('meja')->where('id_meja', $id)->update([
+            'nomor_meja' => $req->input('nomor_meja'),
+            'status' => $req->input('status')
         ]);
-        if($save){
-            return Response()->json(['status'=>true, 'message'=>'Sukses Menambah Meja']);
+
+        if ($update) {
+            return response()->json('Sukses');
         } else {
-            return Response()->json(['status'=>false, 'message'=>'Gagal Menambah Meja']);
+            return response()->json('gagal');
         }
     }
 
-    public function updateMeja(Request $req, $id_meja)
+    public function deletemeja($id)
     {
-       $validator = Validator::make($req->all(),[
-        'nomor_meja'=>'required',
-       ]);
-       if($validator->fails()){
-        return Response()->json($validator->errors()->toJson());
-       }
-
-    $ubah=Meja::where('id_meja',$id_meja)->update([
-        'nomor_meja' =>$req->get('nomor_meja'),
-
-    ]);
-    if($ubah){
-        return Response()->json(['status'=>true,'message' => 'Berhasil Mengubah Meja']);
-    } else {
-        return Response()->json(['status'=>false,'message' => 'Gagal Mengubah Meja']);
-    }
-    }
-
-    public function deleteMeja($id_meja)
-    {
-        $hapus=Meja::where('id_meja', $id_meja)->delete();
-        if($hapus){
-            return Response()->json(['status'=>true, 'message' => 'Sukses Hapus Meja']);
+        $delete = DB::table('meja')->where('id_meja', $id)->delete();
+        if ($delete) {
+            return response()->json('Berhasil Hapus meja');
         } else {
-            return Response()->json(['status'=>false,'message' => "Gagal Hapus Meja"]);
+            return response()->json('Meja sudah tidak ada/terhapus');
         }
     }
 }
