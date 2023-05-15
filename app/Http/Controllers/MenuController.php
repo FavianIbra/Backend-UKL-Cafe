@@ -76,7 +76,7 @@ class MenuController extends Controller
         $imagename = time() . '.' . $req->foto->extension();
         $req->foto->move(public_path('images'), $imagename);
 
-        $update = Menu::where('id_menu', $id)->update([
+        $update = DB::table('menu')->where('id_menu', $id)->update([
             'foto' => $imagename
         ]);
 

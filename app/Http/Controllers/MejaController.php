@@ -12,7 +12,7 @@ class MejaController extends Controller
 {
     public function getmeja()
     {
-        $getmeja = Meja::get();
+        $getmeja = DB::table('meja')->get();
         return response()->json($getmeja);
     }
 

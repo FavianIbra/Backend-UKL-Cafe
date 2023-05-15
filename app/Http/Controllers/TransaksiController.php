@@ -20,33 +20,33 @@ class TransaksiController extends Controller
 
     public function ongoing()
     {
-        $get = Meja::where('status', 'digunakan')->get();
+        $get = DB::table('meja')->where('status', 'digunakan')->get();
         return response()->json($get);
     }
 
     public function getongoingtransaksi($id)
     {
-        $gettransaksi = Transaksi::where('id_meja', $id)->where('status', 'belum_lunas')->first();
+        $gettransaksi = DB::table('transaksi')->where('id_meja', $id)->where('status', 'belum_bayar')->first();
         return response()->json($gettransaksi);
     }
 
     public function totalharga($id)
     {
-        $gettotal = Transaksi::where('id_meja', $id)->where('status', 'belum_lunas')->sum('total_harga');
+        $gettotal = DB::table('transaksi')->where('id_meja', $id)->where('status', 'belum_bayar')->sum('total_harga');
         return response()->json($gettotal);
     }
 
     public function getcart()
     {
-        $cart = Transaksi::where('id_meja', null)
-            ->join('menu', 'transaksis.id_menu', '=', 'menu.id_menu')
+        $cart = DB::table('transaksi')->where('id_meja', null)
+            ->join('menu', 'transaksi.id_menu', '=', 'menu.id_menu')
             ->get();
         return response()->json($cart);
     }
 
     public function selecttransaksi($id)
     {
-        $gettransaksi = Transaksi::where('id_pelayanan', $id)->get();
+        $gettransaksi = DB::table('transaksi')->where('id_pelayanan', $id)->get();
         return response()->json($gettransaksi);
     }
 
@@ -59,7 +59,7 @@ class TransaksiController extends Controller
         $total_pesanan = $req->input('total_pesanan');
         $total_harga = $harga_menu * $total_pesanan;
 
-        $tambah = Transaksi::create([
+        $tambah = DB::table('transaksi')->insert([
             'id_menu' => $req->input('id_menu'),
             'tanggal_pesan' => $tgl_pesan,
             'total_pesanan' => $total_pesanan,
@@ -98,11 +98,11 @@ class TransaksiController extends Controller
 
     public function donetransaksi($id)
     {
-        $done = Transaksi::where('id_meja', $id)->where('status', 'belum_lunas')->update([
+        $done = DB::table('transaksi')->where('id_meja', $id)->where('status', 'belum_lunas')->update([
             'status' => 'lunas'
         ]);
 
-        $meja = Meja::where('id_meja', $id)->update([
+        $meja = DB::table('meja')->where('id_meja', $id)->update([
             'status' => 'kosong'
         ]);
 
