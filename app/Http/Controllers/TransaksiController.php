@@ -24,6 +24,22 @@ class TransaksiController extends Controller
         return response()->json($get);
     }
 
+    public function history()
+    {
+        $gethistory = DB::table('history')->orderBy('id_history','desc')->get();
+        return response()->json($gethistory);
+    }
+
+    public function selecthistory($code)
+    {
+        $gethistory = DB::table('transaksi')
+        ->where('id_pelayanan', $code)
+        ->join('user','transaksi.id_user','=','user.id_user')
+        ->join('menu','transaksi.id_menu','=','menu.id_menu')
+        ->get();
+        return response()->json($gethistory);
+    }
+
     public function getongoingtransaksi($id)
     {
         $gettransaksi = DB::table('transaksi')->where('id_meja', $id)->where('status', 'belum_bayar')->first();
@@ -88,12 +104,21 @@ class TransaksiController extends Controller
         $updatemeja = DB::table('meja')->where('id_meja', $req->input('id_meja'))->update([
             'status' => 'Digunakan'
         ]);
+        
+        $checkout = DB::table('history')->insert([
+            'id_pelayanan' => $id_pelayanan,
+            'tgl_transaksi' => Carbon::now(),
+            'id_user' => $req->input('id_user'),
+            'nama_pelanggan' => $req->input('nama_pelanggan'),
+        ]);
 
         if ($checkout && $updatemeja) {
             return response()->json('Berhasil');
         } else {
             return response()->json('Gagal');
         }
+
+
     }
 
     public function donetransaksi($id)

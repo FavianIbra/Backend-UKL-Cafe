@@ -60,3 +60,5 @@ Route::put('/checkout',[TransaksiController::class,'checkout']);
 Route::put('/done_transaksi/{id}',[TransaksiController::class,'donetransaksi']);
 Route::get('/gettransaksi/{id}',[TransaksiController::class,'selecttransaksi']);
 Route::post('/tambahpesanan',[TransaksiController::class,'tambahpesanan']);
+Route::get('/history',[TransaksiController::class,'history']);
+Route::get('/history/{code}',[TransaksiController::class,'selecthistory']);

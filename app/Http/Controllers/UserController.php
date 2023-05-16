@@ -22,6 +22,8 @@ class UserController extends Controller
             return response()->json($kasir);
     }
 
+
+
     public function selectuser($id)
     {
         $getuser = DB::table('user')->where('id_user', $id)->get();

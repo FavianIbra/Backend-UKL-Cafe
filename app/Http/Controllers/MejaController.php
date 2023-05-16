@@ -30,6 +30,14 @@ class MejaController extends Controller
 
     public function createmeja(Request $req)    
     {
+        $validator = Validator::make($req->all(),[
+            'nomor_meja' => 'unique:meja'
+        ]);
+
+        if($validator -> fails()){
+            return response()->json($validator -> error() -> tojson(), 422);
+        }
+
         $create  = DB::table('meja')->insert([
             'nomor_meja' => $req->input('nomor_meja'),
             'status' => 'kosong'
