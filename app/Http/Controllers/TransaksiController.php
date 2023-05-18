@@ -12,6 +12,19 @@ use Illuminate\Support\Facades\DB;
 
 class TransaksiController extends Controller
 {
+
+    public function getdate($date)
+    {
+        $get = Transaksi::where('tanggal_pesan', $date)->sum('total_harga');
+        return response()->json($get);
+    }
+
+    public function getmonth($month)
+    {
+        $get = Transaksi::whereMonth('tanggal_pesan', substr($month, 5, 2))->sum('total_harga');
+        return response()->json($get);
+    }
+    
     public function gettransaksi()
     {
         $gettransaksi = Transaksi::get();
@@ -20,14 +33,16 @@ class TransaksiController extends Controller
 
     public function ongoing()
     {
-        $get = DB::table('meja')->where('status', 'digunakan')->get();
+        $get = DB::table('meja')->where('status', 'Digunakan')->get();
         return response()->json($get);
     }
 
     public function history()
     {
-        $gethistory = DB::table('history')->orderBy('id_history','desc')->get();
-        return response()->json($gethistory);
+        $get = DB::table('history')
+            ->join('user', 'history.id_user', '=', 'user.id_user')
+            ->orderBy('id_history', 'desc')->get();
+        return response()->json($get);
     }
 
     public function selecthistory($code)
@@ -45,6 +60,12 @@ class TransaksiController extends Controller
         $gettransaksi = DB::table('transaksi')->where('id_meja', $id)->where('status', 'belum_bayar')->first();
         return response()->json($gettransaksi);
     }
+    public function total($code)
+        {
+            $get = Transaksi::where('id_pelayanan', $code)->sum('total_harga');
+            return response()->json($get);
+        }
+
 
     public function totalharga($id)
     {
@@ -123,12 +144,12 @@ class TransaksiController extends Controller
 
     public function donetransaksi($id)
     {
-        $done = DB::table('transaksi')->where('id_meja', $id)->where('status', 'belum_lunas')->update([
-            'status' => 'lunas'
+        $done = DB::table('transaksi')->where('id_meja', $id)->where('status', 'belum_bayar')->update([
+            'status' => 'Lunas'
         ]);
 
         $meja = DB::table('meja')->where('id_meja', $id)->update([
-            'status' => 'kosong'
+            'status' => 'Kosong'
         ]);
 
         if ($done && $meja) {
