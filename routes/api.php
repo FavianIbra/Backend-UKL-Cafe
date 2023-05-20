@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
 use App\Models\Transaksi;
 
 /*
@@ -65,3 +66,4 @@ Route::get('/history',[TransaksiController::class,'history']);
 Route::get('/history/{code}',[TransaksiController::class,'selecthistory']);
 Route::get('/getday/{date}',[TransaksiController::class,'getdate']);
 Route::get('/getmonth/{month}',[TransaksiController::class,'getmonth']);
+Route::post('/login' ,[AuthController::class,'login']);

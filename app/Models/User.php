@@ -25,7 +25,7 @@ class User extends Authenticatable
         'gender'
     ];
 
-    // protected $table = "user";
+    protected $table = "user";
     
     // protected $timestamps = null;
     /**
